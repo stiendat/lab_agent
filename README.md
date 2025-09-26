@@ -11,6 +11,7 @@ A complete, locally-hosted AI document agent that automatically indexes your doc
 - **🤖 RAG-Powered Q&A**: Ask questions about your documents and get AI-powered answers with source citations
 - **⚡ Real-Time Processing**: File changes are detected and processed instantly
 - **🖥️ Interactive CLI**: User-friendly command-line interface
+- **⚙️ .env Configuration**: Easy configuration via environment variables
 
 ## 📋 Prerequisites
 
@@ -33,7 +34,18 @@ uv sync
 pip install -r requirements.txt
 ```
 
-### 2. Start Your Local LLM Server
+### 2. Configure Your Agent (Optional)
+
+The agent comes with sensible defaults, but you can customize it using the `.env` file:
+
+```bash
+# Edit the .env file to configure your preferences
+nano .env
+```
+
+See the [📝 Configuration](#-configuration) section below for all available options.
+
+### 3. Start Your Local LLM Server
 
 Before running the agent, ensure you have a local LLM server running on port 8081:
 
@@ -45,27 +57,28 @@ Before running the agent, ensure you have a local LLM server running on port 808
 # http://localhost:8081/v1/chat/completions
 ```
 
-### 3. Run the Complete Agent
+### 4. Run the Complete Agent
 
 ```bash
 python complete_agent.py
 ```
 
 This starts both:
-- 🔍 **Auto-indexing file watcher** (monitors `docs-to-watch-1/` and `docs-to-watch-2/`)
+- 🔍 **Auto-indexing file watcher** (monitors your configured directories)
 - 💬 **Interactive query interface** (for asking questions)
 
-### 4. Add Documents
+### 5. Add Documents
 
 Copy any documents to the monitored directories:
 ```bash
+# Default directories (can be changed in .env)
 cp your-document.pdf docs-to-watch-1/
 cp your-notes.txt docs-to-watch-2/
 ```
 
 Files are automatically indexed within seconds! ⚡
 
-### 5. Ask Questions
+### 6. Ask Questions
 
 ```
 💬 Your question (or 'exit'/'stats'): What does the document say about machine learning?
@@ -77,6 +90,134 @@ Based on your documents, machine learning is described as...
    1. your-document.pdf
    2. your-notes.txt
 ```
+
+## ⚙️ Configuration
+
+The AI Document Agent uses a `.env` file for easy configuration. Here's how to customize it:
+
+### 📝 .env File Structure
+
+```env
+# AI Document Agent Configuration
+
+# Directories to monitor for auto-indexing (comma-separated)
+# You can specify absolute or relative paths
+MONITOR_DIRECTORIES=./docs-to-watch-1,./docs-to-watch-2
+
+# LLM Server Configuration
+LLM_API_URL=http://localhost:8081/v1/chat/completions
+
+# Database Configuration (optional)
+SQLITE_PATH=metadata.sqlite
+MILVUS_PATH=./milvus_local.db
+
+# Embedding Configuration (optional)
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+EMBEDDING_DEVICE=auto
+
+# Search Configuration (optional)
+DEFAULT_TOP_K=5
+SEARCH_TIMEOUT=30
+```
+
+### 🔧 Configuration Options
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `MONITOR_DIRECTORIES` | Directories to watch (comma-separated) | `./docs-to-watch-1,./docs-to-watch-2` | `./my-docs,/Users/me/Documents` |
+| `LLM_API_URL` | Local LLM server endpoint | `http://localhost:8081/v1/chat/completions` | `http://192.168.1.100:8080/v1/chat/completions` |
+| `SQLITE_PATH` | SQLite database file path | `metadata.sqlite` | `./db/documents.sqlite` |
+| `MILVUS_PATH` | Milvus database file path | `./milvus_local.db` | `./db/vectors.db` |
+| `EMBEDDING_MODEL` | Sentence transformer model | `all-MiniLM-L6-v2` | `all-MiniLM-L12-v2` |
+| `EMBEDDING_DEVICE` | Device for embeddings (auto/cpu/cuda) | `auto` | `cuda` |
+| `DEFAULT_TOP_K` | Number of chunks to retrieve | `5` | `10` |
+| `SEARCH_TIMEOUT` | LLM request timeout (seconds) | `30` | `60` |
+
+### 📁 Directory Configuration Examples
+
+**Monitor Multiple Personal Folders:**
+```env
+MONITOR_DIRECTORIES=./Documents,./Research,./Notes,./Downloads/PDFs
+```
+
+**Monitor Absolute Paths:**
+```env
+MONITOR_DIRECTORIES=/Users/username/Documents,/Users/username/Research,/path/to/work/docs
+```
+
+**Single Directory:**
+```env
+MONITOR_DIRECTORIES=./my-knowledge-base
+```
+
+**Network or External Drives:**
+```env
+MONITOR_DIRECTORIES=/Volumes/ExternalDrive/Documents,/Network/SharedDocs
+```
+
+### 🖥️ Server Configuration Examples
+
+**Different LLM Server:**
+```env
+LLM_API_URL=http://192.168.1.100:11434/v1/chat/completions
+```
+
+**Custom Port:**
+```env
+LLM_API_URL=http://localhost:3000/v1/chat/completions
+```
+
+**Remote Server:**
+```env
+LLM_API_URL=https://my-llm-server.com/v1/chat/completions
+```
+
+### 🗄️ Database Configuration Examples
+
+**Custom Database Locations:**
+```env
+SQLITE_PATH=./databases/metadata.sqlite
+MILVUS_PATH=./databases/vectors.db
+```
+
+**Separate Drive for Databases:**
+```env
+SQLITE_PATH=/Volumes/FastSSD/ai-agent/metadata.sqlite
+MILVUS_PATH=/Volumes/FastSSD/ai-agent/vectors.db
+```
+
+### 🚀 How to Apply Configuration Changes
+
+1. **Edit the .env file:**
+   ```bash
+   nano .env
+   # or use your favorite editor
+   ```
+
+2. **Restart the agent:**
+   ```bash
+   # Stop current agent (Ctrl+C)
+   # Start again
+   python complete_agent.py
+   ```
+
+3. **Verify configuration:**
+   The agent will display your settings at startup:
+   ```
+   📂 Loaded 3 directories from .env file:
+      📁 ./Documents
+      📁 ./Research
+      📁 ./Notes
+   🔗 LLM API URL: http://localhost:8081/v1/chat/completions
+   ```
+
+### ⚠️ Important Notes
+
+- **Create directories first**: Make sure monitored directories exist or the agent will show warnings
+- **Relative vs Absolute paths**: Relative paths are relative to the project directory
+- **Restart required**: Changes to `.env` require restarting the agent
+- **Comma separation**: Use commas without spaces between directory paths
+- **No quotes needed**: Don't wrap paths in quotes in the .env file
 
 ## 📁 Project Structure
 
@@ -170,45 +311,6 @@ python agent_orchestrator.py
 | `stats` | View system statistics (documents, chunks, vectors) |
 | `exit` | Gracefully exit the application |
 | `Ctrl+C` | Emergency exit (both processes) |
-
-## 🔧 Configuration
-
-### Monitored Directories
-
-Default monitored directories:
-- `./docs-to-watch-1/`
-- `./docs-to-watch-2/`
-
-To change monitored directories, modify `complete_agent.py`:
-
-```python
-# Custom directories
-agent = CompleteDocumentAgent([
-    "/path/to/your/documents",
-    "/another/document/folder"
-])
-```
-
-### LLM Server Configuration
-
-Default LLM endpoint: `http://localhost:8081/v1/chat/completions`
-
-To change the endpoint, modify `agent_orchestrator.py`:
-
-```python
-self.LLM_API_URL = "http://your-server:port/v1/chat/completions"
-```
-
-### Supported File Types
-
-| Extension | Library Used | Status |
-|-----------|--------------|---------|
-| `.pdf` | PyMuPDF | ✅ Full support |
-| `.docx` | python-docx | ✅ Full support |
-| `.txt` | Built-in | ✅ Full support |
-| `.md` | Built-in | ✅ Full support |
-| `.py`, `.js`, `.html`, `.css`, etc. | Built-in | ✅ Full support |
-| Other formats | Fallback | ⚠️ Limited (filename only) |
 
 ## 📊 System Statistics
 
