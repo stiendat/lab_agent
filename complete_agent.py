@@ -10,7 +10,12 @@ import threading
 import signal
 import sys
 import time
+import os
+from dotenv import load_dotenv
 from auto_indexing_agent import AutoIndexingAgent
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class CompleteDocumentAgent:
@@ -24,8 +29,13 @@ class CompleteDocumentAgent:
 
         Args:
             directories_to_watch: List of directories to monitor for auto-indexing
+                                 If None, reads from .env file or uses defaults
         """
         print("🚀 Initializing Complete AI Document Agent...")
+
+        # Get directories from .env file if not provided
+        if directories_to_watch is None:
+            directories_to_watch = self._load_monitor_directories()
 
         # Initialize the auto-indexing agent
         self.auto_agent = AutoIndexingAgent(directories_to_watch)
@@ -38,6 +48,31 @@ class CompleteDocumentAgent:
         signal.signal(signal.SIGINT, self._signal_handler)
 
         print("✅ Complete AI Document Agent initialized!")
+
+    def _load_monitor_directories(self):
+        """
+        Load monitor directories from environment variables or use defaults.
+
+        Returns:
+            List of directories to monitor
+        """
+        # Get directories from .env file
+        monitor_dirs_env = os.getenv('MONITOR_DIRECTORIES', '')
+
+        if monitor_dirs_env:
+            # Split by comma and strip whitespace
+            directories = [dir.strip() for dir in monitor_dirs_env.split(',') if dir.strip()]
+            print(f"📂 Loaded {len(directories)} directories from .env file:")
+            for directory in directories:
+                print(f"   📁 {directory}")
+            return directories
+        else:
+            # Use default directories
+            default_dirs = ["./docs-to-watch-1", "./docs-to-watch-2"]
+            print("📂 Using default monitor directories:")
+            for directory in default_dirs:
+                print(f"   📁 {directory}")
+            return default_dirs
 
     def _signal_handler(self, signum, frame):
         """Handle Ctrl+C signal for graceful shutdown."""

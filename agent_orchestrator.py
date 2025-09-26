@@ -9,7 +9,12 @@ and Retrieval-Augmented Generation (RAG) query capabilities.
 
 import json
 import requests
+import os
 from typing import List, Dict, Any, Tuple, Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Import the previously created modules
 from ingestion_pipeline import IngestionPipeline
@@ -30,8 +35,9 @@ class AgentOrchestrator:
         """
         print("Initializing Agent Orchestrator...")
 
-        # Define LLM API endpoint for local llama.cpp server
-        self.LLM_API_URL = "http://localhost:8081/v1/chat/completions"
+        # Define LLM API endpoint from .env file or use default
+        self.LLM_API_URL = os.getenv('LLM_API_URL', 'http://localhost:8081/v1/chat/completions')
+        print(f"🔗 LLM API URL: {self.LLM_API_URL}")
 
         # Initialize all component modules
         try:

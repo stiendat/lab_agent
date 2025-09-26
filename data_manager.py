@@ -10,6 +10,7 @@ import sqlite3
 import os
 import numpy as np
 from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
 from pymilvus import (
     connections,
     FieldSchema,
@@ -19,6 +20,9 @@ from pymilvus import (
     utility
 )
 
+# Load environment variables from .env file
+load_dotenv()
+
 
 class DataManager:
     """
@@ -26,21 +30,22 @@ class DataManager:
     Uses SQLite for metadata and Milvus Lite for vector storage.
     """
 
-    def __init__(self, sqlite_path: str = "metadata.sqlite", milvus_path: str = "./milvus_local.db"):
+    def __init__(self, sqlite_path: str = None, milvus_path: str = None):
         """
         Initialize the DataManager with both SQLite and Milvus Lite databases.
 
         Args:
-            sqlite_path (str): Path to the SQLite database file
-            milvus_path (str): Path to the Milvus Lite database file
+            sqlite_path (str): Path to the SQLite database file (optional, reads from .env)
+            milvus_path (str): Path to the Milvus Lite database file (optional, reads from .env)
         """
-        self.sqlite_path = sqlite_path
-        self.milvus_path = milvus_path
+        # Get database paths from .env file or use provided/default values
+        self.sqlite_path = sqlite_path or os.getenv('SQLITE_PATH', 'metadata.sqlite')
+        self.milvus_path = milvus_path or os.getenv('MILVUS_PATH', './milvus_local.db')
         self.collection_name = "document_embeddings"
 
         print("Initializing DataManager...")
-        print(f"SQLite database: {sqlite_path}")
-        print(f"Milvus database: {milvus_path}")
+        print(f"SQLite database: {self.sqlite_path}")
+        print(f"Milvus database: {self.milvus_path}")
 
         # Initialize both databases
         self._init_sqlite()
